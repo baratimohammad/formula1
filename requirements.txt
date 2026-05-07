@@ -6,3 +6,4 @@ dagster
 dagster-webserver
 duckdb==0.10.3
 pytest
+ruff

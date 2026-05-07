@@ -1,0 +1,17 @@
+api:
+  base_url: "https://api.openf1.org/v1"
+  timeout_seconds: 30
+
+storage:
+  raw_root: "data/raw"
+  overwrite: true
+
+pipeline:
+  retries:
+    max_retries: 3
+    delay_seconds: 5
+    backoff: "EXPONENTIAL"
+    jitter: "PLUS_MINUS"
+  schedule:
+    cron: "0 0 * * *"
+    timezone: "UTC"

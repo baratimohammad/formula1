@@ -34,6 +34,11 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      - name: Validate configuration files
+        run: |
+          test -f config/config.yaml
+          test -f config/logging.yaml
+
       - name: Run Python linting with Ruff
         run: |
           ruff check src tests orchestration
@@ -75,6 +80,11 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+
+      - name: Validate configuration files
+        run: |
+          test -f config/config.yaml
+          test -f config/logging.yaml
 
       - name: Run pipeline smoke test
         run: |

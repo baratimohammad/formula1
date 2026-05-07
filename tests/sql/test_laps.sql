@@ -5,7 +5,7 @@
 SELECT
     'laps_row_count_non_zero' AS test_name,
     COUNT(*) AS row_count
-FROM read_parquet('data/raw/laps/session_key=*/laps.parquet')
+FROM read_parquet('{{ raw_root }}/laps/session_key=*/laps.parquet', union_by_name = true)
 HAVING COUNT(*) = 0;
 
 
@@ -17,7 +17,7 @@ HAVING COUNT(*) = 0;
 SELECT
     'laps_primary_key_not_null' AS test_name,
     *
-FROM read_parquet('data/raw/laps/session_key=*/laps.parquet')
+FROM read_parquet('{{ raw_root }}/laps/session_key=*/laps.parquet', union_by_name = true)
 WHERE session_key IS NULL
    OR driver_number IS NULL
    OR lap_number IS NULL;
@@ -34,7 +34,7 @@ SELECT
     driver_number,
     lap_number,
     COUNT(*) AS duplicate_count
-FROM read_parquet('data/raw/laps/session_key=*/laps.parquet')
+FROM read_parquet('{{ raw_root }}/laps/session_key=*/laps.parquet', union_by_name = true)
 GROUP BY
     session_key,
     driver_number,
@@ -49,7 +49,7 @@ HAVING COUNT(*) > 1;
 SELECT
     'laps_data_type_correctness' AS test_name,
     *
-FROM read_parquet('data/raw/laps/session_key=*/laps.parquet')
+FROM read_parquet('{{ raw_root }}/laps/session_key=*/laps.parquet', union_by_name = true)
 WHERE typeof(session_key) NOT IN ('INTEGER', 'BIGINT')
    OR typeof(driver_number) NOT IN ('INTEGER', 'BIGINT')
    OR typeof(lap_number) NOT IN ('INTEGER', 'BIGINT')

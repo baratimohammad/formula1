@@ -14,17 +14,37 @@ from dagster import (
     define_asset_job,
 )
 
+from src.config_loader import (
+    build_raw_output_path,
+    configure_logging,
+    get_pipeline_retry_config,
+    get_pipeline_schedule_config,
+    get_storage_overwrite,
+)
 from src.ingestion.api_client import resolve_latest_session
 from src.ingestion.drivers import ingest_drivers_for_session
 from src.ingestion.laps import ingest_laps_for_session
 from src.storage.parquet_writer import write_records_to_parquet
 
 
+configure_logging()
+
+RETRY_BACKOFFS = {
+    "EXPONENTIAL": Backoff.EXPONENTIAL,
+    "LINEAR": Backoff.LINEAR,
+}
+RETRY_JITTERS = {
+    "PLUS_MINUS": Jitter.PLUS_MINUS,
+}
+
+retry_config = get_pipeline_retry_config()
+schedule_config = get_pipeline_schedule_config()
+
 api_retry_policy = RetryPolicy(
-    max_retries=3,
-    delay=5,
-    backoff=Backoff.EXPONENTIAL,
-    jitter=Jitter.PLUS_MINUS,
+    max_retries=int(retry_config["max_retries"]),
+    delay=int(retry_config["delay_seconds"]),
+    backoff=RETRY_BACKOFFS[str(retry_config["backoff"]).upper()],
+    jitter=RETRY_JITTERS[str(retry_config["jitter"]).upper()],
 )
 
 
@@ -65,12 +85,12 @@ def drivers(
 
     records = ingest_drivers_for_session(session_key)
 
-    output_path = f"data/raw/drivers/session_key={session_key}/drivers.parquet"
+    output_path = str(build_raw_output_path("drivers", session_key, "drivers.parquet"))
 
     write_records_to_parquet(
         records=records,
         output_path=output_path,
-        overwrite=True,
+        overwrite=get_storage_overwrite(),
     )
 
     materialized_at_utc = datetime.now(timezone.utc).isoformat()
@@ -107,12 +127,12 @@ def laps(
 
     records = ingest_laps_for_session(session_key)
 
-    output_path = f"data/raw/laps/session_key={session_key}/laps.parquet"
+    output_path = str(build_raw_output_path("laps", session_key, "laps.parquet"))
 
     write_records_to_parquet(
         records=records,
         output_path=output_path,
-        overwrite=True,
+        overwrite=get_storage_overwrite(),
     )
 
     materialized_at_utc = datetime.now(timezone.utc).isoformat()
@@ -146,8 +166,8 @@ openf1_ingestion_job = define_asset_job(
 daily_openf1_schedule = ScheduleDefinition(
     name="daily_openf1_schedule",
     job=openf1_ingestion_job,
-    cron_schedule="0 0 * * *",
-    execution_timezone="UTC",
+    cron_schedule=str(schedule_config["cron"]),
+    execution_timezone=str(schedule_config["timezone"]),
 )
 
 

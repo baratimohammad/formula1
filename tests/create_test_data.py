@@ -1,3 +1,4 @@
+from src.config_loader import build_raw_output_path
 from src.storage.parquet_writer import write_records_to_parquet
 
 
@@ -24,13 +25,13 @@ def main():
 
     write_records_to_parquet(
         records=drivers,
-        output_path="data/raw/drivers/session_key=999/drivers.parquet",
+        output_path=str(build_raw_output_path("drivers", 999, "drivers.parquet")),
         overwrite=True,
     )
 
     write_records_to_parquet(
         records=laps,
-        output_path="data/raw/laps/session_key=999/laps.parquet",
+        output_path=str(build_raw_output_path("laps", 999, "laps.parquet")),
         overwrite=True,
     )
 

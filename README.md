@@ -15,6 +15,10 @@ python3.10 -m venv venv
 venv/bin/pip install -r requirements.txt
 ```
 
+Project configuration:
+- `config/config.yaml` controls API, storage, retry, and schedule settings.
+- `config/logging.yaml` controls Python logging output.
+
 Run the pipeline job locally:
 
 ```bash
@@ -39,6 +43,7 @@ venv/bin/python tests/run_sql_tests.py
 ## Troubleshooting
 
 - `ModuleNotFoundError`: run commands from the repository root and use the project virtualenv.
+- `Configuration file not found`: confirm `config/config.yaml` and `config/logging.yaml` exist in the repository root.
 - `requests` or connection failures: confirm outbound network access to the OpenF1 API.
 - `No records to write`: the upstream API returned no rows for the resolved session; inspect the API response and session metadata.
 - CI smoke test failures: check the `Pipeline smoke test` job in `CI`, which validates that the Dagster job can execute successfully.
@@ -55,7 +60,7 @@ venv/bin/python tests/run_sql_tests.py
   - Monitor asset materializations for `latest_session`, `drivers`, and `laps`.
   - Inspect asset logs for row counts, output paths, and retry activity.
 - Data outputs:
-  - Confirm expected files exist under `data/raw/sessions/`, `data/raw/drivers/`, and `data/raw/laps/`.
+  - Confirm expected files exist under the configured `storage.raw_root`, which defaults to `data/raw/`.
 
 ## Handle Failed Runs
 
@@ -72,4 +77,4 @@ venv/bin/python tests/run_sql_tests.py
 
 ## Generative AI Disclosure
 
-Generative AI was used to assist with parts of this repository’s development and documentation. AI-generated suggestions were reviewed and edited by a human before being kept in the codebase.
+Parts of this repository’s development and documentation were generated with assistance from ChatGPT and Codex. AI-generated suggestions were reviewed and edited before being kept in the codebase.

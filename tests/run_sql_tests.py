@@ -2,9 +2,14 @@ from pathlib import Path
 
 import duckdb
 
+from src.config_loader import get_storage_raw_root
+
 
 def run_sql_file(sql_file: Path) -> None:
-    sql = sql_file.read_text()
+    sql = sql_file.read_text().replace(
+        "{{ raw_root }}",
+        get_storage_raw_root().as_posix(),
+    )
 
     statements = [
         statement.strip()

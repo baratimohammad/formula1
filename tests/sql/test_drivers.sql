@@ -5,7 +5,7 @@
 SELECT
     'drivers_row_count_non_zero' AS test_name,
     COUNT(*) AS row_count
-FROM read_parquet('data/raw/drivers/session_key=*/drivers.parquet')
+FROM read_parquet('{{ raw_root }}/drivers/session_key=*/drivers.parquet', union_by_name = true)
 HAVING COUNT(*) = 0;
 
 
@@ -17,7 +17,7 @@ HAVING COUNT(*) = 0;
 SELECT
     'drivers_primary_key_not_null' AS test_name,
     *
-FROM read_parquet('data/raw/drivers/session_key=*/drivers.parquet')
+FROM read_parquet('{{ raw_root }}/drivers/session_key=*/drivers.parquet', union_by_name = true)
 WHERE session_key IS NULL
    OR driver_number IS NULL;
 
@@ -32,7 +32,7 @@ SELECT
     session_key,
     driver_number,
     COUNT(*) AS duplicate_count
-FROM read_parquet('data/raw/drivers/session_key=*/drivers.parquet')
+FROM read_parquet('{{ raw_root }}/drivers/session_key=*/drivers.parquet', union_by_name = true)
 GROUP BY
     session_key,
     driver_number
@@ -47,7 +47,7 @@ HAVING COUNT(*) > 1;
 SELECT
     'drivers_data_type_correctness' AS test_name,
     *
-FROM read_parquet('data/raw/drivers/session_key=*/drivers.parquet')
+FROM read_parquet('{{ raw_root }}/drivers/session_key=*/drivers.parquet', union_by_name = true)
 WHERE typeof(session_key) NOT IN ('INTEGER', 'BIGINT')
    OR typeof(driver_number) NOT IN ('INTEGER', 'BIGINT')
    OR typeof(full_name) <> 'VARCHAR'

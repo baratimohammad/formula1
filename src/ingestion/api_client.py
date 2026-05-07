@@ -1,6 +1,6 @@
 import requests
 
-BASE_URL = "https://api.openf1.org/v1"
+from src.config_loader import get_api_base_url, get_api_timeout_seconds
 
 
 def fetch_json(endpoint: str, params: dict | None = None) -> list[dict]:
@@ -11,9 +11,9 @@ def fetch_json(endpoint: str, params: dict | None = None) -> list[dict]:
         fetch_json("drivers", {"session_key": 9158})
     """
     response = requests.get(
-        f"{BASE_URL}/{endpoint}",
+        f"{get_api_base_url()}/{endpoint}",
         params=params,
-        timeout=30,
+        timeout=get_api_timeout_seconds(),
     )
     response.raise_for_status()
     return response.json()

@@ -1,15 +1,18 @@
+from datetime import datetime, timezone
+
 from src.ingestion.api_client import fetch_json
 
 
 def ingest_laps_for_session(session_key: int) -> list[dict]:
-    """
-    Ingest all laps for a given OpenF1 session.
-
-    The returned records are kept source-derived and sorted so rerunning
-    ingestion for the same session produces the same logical output.
-    """
     laps = fetch_json("laps", {"session_key": session_key})
-    return sorted(laps, key=_lap_sort_key)
+
+    ingested_at = datetime.now(timezone.utc).isoformat()
+
+    for lap in laps:
+        lap["session_key"] = session_key
+        lap["ingested_at_utc"] = ingested_at
+
+    return laps
 
 
 def _lap_sort_key(lap: dict) -> tuple[bool, int, bool, int, bool, str]:

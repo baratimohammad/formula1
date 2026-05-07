@@ -4,3 +4,5 @@ pyarrow==10.0.1
 numpy==1.26.4
 dagster
 dagster-webserver
+duckdb==0.10.3
+pytest

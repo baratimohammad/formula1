@@ -1,15 +1,18 @@
+from datetime import datetime, timezone
+
 from src.ingestion.api_client import fetch_json
 
 
 def ingest_drivers_for_session(session_key: int) -> list[dict]:
-    """
-    Ingest all drivers for a given OpenF1 session.
-
-    The returned records are kept source-derived and sorted so rerunning
-    ingestion for the same session produces the same logical output.
-    """
     drivers = fetch_json("drivers", {"session_key": session_key})
-    return sorted(drivers, key=_driver_sort_key)
+
+    ingested_at = datetime.now(timezone.utc).isoformat()
+
+    for driver in drivers:
+        driver["session_key"] = session_key
+        driver["ingested_at_utc"] = ingested_at
+
+    return drivers
 
 
 def _driver_sort_key(driver: dict) -> tuple[bool, int]:

@@ -77,4 +77,4 @@ venv/bin/python tests/run_sql_tests.py
 
 ## Generative AI Disclosure
 
-Generative AI was used to assist with parts of this repository’s development and documentation. AI-generated suggestions were reviewed and edited by a human before being kept in the codebase.
+Parts of this repository’s development and documentation were generated with assistance from ChatGPT and Codex. AI-generated suggestions were reviewed and edited before being kept in the codebase.

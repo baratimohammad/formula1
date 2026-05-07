@@ -41,14 +41,16 @@ venv/bin/python tests/run_sql_tests.py
 - `ModuleNotFoundError`: run commands from the repository root and use the project virtualenv.
 - `requests` or connection failures: confirm outbound network access to the OpenF1 API.
 - `No records to write`: the upstream API returned no rows for the resolved session; inspect the API response and session metadata.
-- GitHub Actions smoke tests fail with `python main.py`: the workflows still reference `main.py` and need to be aligned with the Dagster job entrypoint.
+- CI smoke test failures: check the `Pipeline smoke test` job in `CI`, which validates that the Dagster job can execute successfully.
+- Deploy workflow failures: check the `Deploy / Publish Pipeline Snapshot` workflow, which runs the pipeline and uploads raw output plus Dagster run metadata as artifacts.
 - Dagster reruns replace data: the `drivers` and `laps` assets call `write_records_to_parquet(..., overwrite=True)`, so reruns refresh those parquet snapshots.
 
 ## Monitor Pipeline Health
 
 - GitHub Actions:
   - `CI` validates linting, unit tests, test data creation, and SQL checks.
-  - `Pipeline smoke test` and `Deploy / Pipeline Smoke Test` are intended to validate pipeline execution on pushes to `main`.
+  - `Pipeline smoke test` in `CI` is the lightweight execution check.
+  - `Deploy / Publish Pipeline Snapshot` runs the pipeline on `main` and uploads the generated raw data and Dagster metadata as workflow artifacts.
 - Dagster:
   - Monitor asset materializations for `latest_session`, `drivers`, and `laps`.
   - Inspect asset logs for row counts, output paths, and retry activity.
@@ -61,6 +63,7 @@ venv/bin/python tests/run_sql_tests.py
   - local CLI output for `dagster job execute`
   - GitHub Actions logs for CI or smoke-test failures
   - Dagster run logs and asset metadata for orchestrated runs
+  - uploaded artifacts from the deploy workflow when you need the produced data snapshot or Dagster metadata
 - Fix the underlying issue, then rerun:
   - local reruns should use `venv/bin/dagster job execute -f orchestration/definitions.py -j openf1_ingestion_job`
   - Dagster asset reruns may overwrite `drivers` and `laps`, so treat them as refreshes rather than strict no-op retries

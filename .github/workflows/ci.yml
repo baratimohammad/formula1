@@ -78,4 +78,4 @@ jobs:
 
       - name: Run pipeline smoke test
         run: |
-          python main.py
+          python -m dagster job execute -f orchestration/definitions.py -j openf1_ingestion_job

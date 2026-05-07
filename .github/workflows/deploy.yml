@@ -1,4 +1,4 @@
-name: Deploy / Pipeline Smoke Test
+name: Deploy / Publish Pipeline Snapshot
 
 on:
   push:
@@ -6,12 +6,13 @@ on:
       - main
 
 jobs:
-  pipeline-smoke-test:
-    name: Run pipeline smoke test
+  publish-pipeline-snapshot:
+    name: Run pipeline and publish artifacts
     runs-on: ubuntu-latest
 
     env:
       PYTHONPATH: .
+      DAGSTER_HOME: ${{ github.workspace }}/.dagster
 
     steps:
       - name: Checkout repository
@@ -27,6 +28,26 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install -r requirements.txt
 
+      - name: Prepare Dagster home
+        run: |
+          mkdir -p "$DAGSTER_HOME"
+
       - name: Run pipeline
         run: |
-          python main.py
+          python -m dagster job execute -f orchestration/definitions.py -j openf1_ingestion_job
+
+      - name: Upload raw data snapshot
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: openf1-raw-data-${{ github.sha }}
+          path: data/raw
+          if-no-files-found: warn
+
+      - name: Upload Dagster run metadata
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dagster-run-metadata-${{ github.sha }}
+          path: .dagster
+          if-no-files-found: warn
